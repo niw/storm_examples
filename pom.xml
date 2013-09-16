@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>at.niw</groupId>
+  <artifactId>storm_examples</artifactId>
+  <packaging>jar</packaging>
+  <version>0.1.0-SNAPSHOT</version>
+
+  <properties>
+    <mainClass>Main</mainClass>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>clojars.org</id>
+      <url>http://clojars.org/repo</url>
+    </repository>
+
+    <repository>
+      <id>atilika.org</id>
+      <url>http://www.atilika.org/nexus/content/repositories/atilika</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>2.9.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>storm</groupId>
+      <artifactId>storm</artifactId>
+      <version>0.9.0-wip21</version>
+    </dependency>
+
+    <!--
+      This dependency, storm:trident-memcached:0.0.5-wip3 is not provided
+      from the repository yet, install it in local Maven repository.
+      See README.md.
+    -->
+    <dependency>
+      <groupId>storm</groupId>
+      <artifactId>trident-memcached</artifactId>
+      <version>0.0.5-wip3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.twitter4j</groupId>
+      <artifactId>twitter4j-stream</artifactId>
+      <version>[3.0,)</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.atilika.kuromoji</groupId>
+      <artifactId>kuromoji</artifactId>
+      <version>0.7.7</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.specs2</groupId>
+      <artifactId>specs2_2.9.2</artifactId>
+      <version>1.12.4.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Compile and run Scala source code -->
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>testCompile</goal>
+            </goals>
+            <configuration>
+              <args>
+                <param>-encoding</param>
+                <param>utf8</param>
+              </args>
+              <jvmArgs>
+                <jvmArg>-Xmx1024m</jvmArg>
+              </jvmArgs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Run unit tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.14</version>
+        <configuration>
+          <argLine>-Xmx1024m</argLine>
+          <redirectTestOutputToFile>false</redirectTestOutputToFile>
+          <includes>
+            <include>**/*Spec.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+
+      <!-- Create a jar contains project classes -->
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>${mainClass}</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- Create a fat jar contains all classes and dependencies -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/all.xml</descriptor>
+              </descriptors>
+              <archive>
+                <manifest>
+                  <mainClass>${mainClass}</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Create .classpath.txt file -->
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+            <configuration>
+              <outputFile>${basedir}/.classpath.txt</outputFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <!-- Use zinc to compile Scala source code -->
+    <profile>
+      <id>zinc</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>scala-maven-plugin</artifactId>
+            <configuration>
+              <recompileMode>incremental</recompileMode>
+              <useZincServer>true</useZincServer>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

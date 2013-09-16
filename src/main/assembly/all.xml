@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<assembly>
+  <!-- An assembly generates a jar includes all runtime dependencies -->
+  <id>all</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+    <dependencySet>
+      <unpack>true</unpack>
+      <!-- Exclude Storm and all dependencies -->
+      <excludes>
+        <exclude>storm:storm</exclude>
+      </excludes>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
+    </dependencySet>
+  </dependencySets>
+</assembly>

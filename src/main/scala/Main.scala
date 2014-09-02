@@ -1,5 +1,6 @@
 import backtype.storm.generated.StormTopology
 import backtype.storm.{LocalCluster, StormSubmitter, Config}
+import sun.misc.{SignalHandler, Signal}
 
 class Args(args: Map[String, List[String]]) {
   def list(key: String): List[String] = args.get(key) getOrElse Nil
@@ -51,7 +52,23 @@ class Submit(className: String, args: Args) {
     if (args.boolean("local")) {
       val cluster = new LocalCluster()
       cluster.submitTopology(factory.name, config, factory.topology)
-      Thread.sleep(args.option("sleep").map(_.toLong) getOrElse 5000)
+
+      val thread = Thread.currentThread
+      Signal.handle(new Signal("INT"), new SignalHandler {
+        def handle(signal: Signal) {
+          thread.interrupt()
+        }
+      })
+      try {
+        args.option("sleep").map(_.toLong) match {
+          case Some(millisecond) => Thread.sleep(millisecond)
+          case None => thread.join()
+        }
+      } catch {
+        case e: InterruptedException => println("Interrupted")
+      }
+
+      println("Shutdown...")
       cluster.killTopology(factory.name)
       cluster.shutdown()
     } else {

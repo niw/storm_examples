@@ -29,11 +29,11 @@ Now we're ready to build examples. This ``mvn`` command will download all depend
 
 Run [a simple Topology](https://github.com/niw/storm_examples/blob/master/src/main/scala/AppendExclamationsTopology.scala) which adds ``!!!`` to the stream input randomly generated in the sample code.
 
-    $ java -cp `cat .classpath`:targets/classes Main AppendExclamationsTopology --local --debug
+    $ java -cp `cat .classpath.txt`:target/classes Main AppendExclamationsTopology --local --debug
 
 There is also another famous example, [WordCount](https://github.com/niw/storm_examples/blob/master/src/main/scala/WordCountTopology.scala).
 
-    $ java -cp `cat .classpath`:targets/classes Main WordCountTopology --local --debug
+    $ java -cp `cat .classpath.txt`:target/classes Main WordCountTopology --local --debug
 
 Use the class path includes all dependencies and run simple [``Main``](https://github.com/niw/storm_examples/blob/master/src/main/scala/Main.scala) class to start Storm Topology.
 ``--local`` option runs Topology locally using ``backtype.storm.LocalCluster`` without submitting job to Storm cluster. ``--debug`` option enables ``setDebug(true)`` for ``backtype.storm.Config``.
@@ -45,32 +45,22 @@ Run Topology on Storm cluster
 
 If you already have Storm, skip this section.
 
-There are no easy way like Hadoop distributions to install Storm, we can use binary distribution to install Storm but still we need to build requirements, [Zeromq](http://zeromq.org/) and [jzmq](https://github.com/nathanmarz/jzmq) from the source code.
+There are no easy way like Hadoop distributions to install Storm, we can use binary distribution to install Storm.
 
 First, install Strom. I recommend to install it to ``/usr/local/strom``.
 Download the latest Strom from [download page](http://storm-project.net/downloads.html).
 
     $ cd /usr/local
-    $ unzip storm-0.9.0-wip21.zip
-    $ ln -s /usr/local/storm-0.9.0-wip21 storm
+    $ tar xzvf apache-storm-0.9.2-incubating.tar.gz
+    $ ln -s /usr/local/apache-storm-0.9.2-incubating storm
     $ export PATH=$PATH:/usr/local/storm/bin
-
-Install requirements, Zeromq and jzmq from source code.
-Run ``scripts/install_zeromq.sh`` helper script to download, build and install.
-We need to install ``automake``, ``pkg-cofig`` and ``libtool``, if we don't have them.
-
-    $ brew install automake pkg-config libtool
-    $ sh scripts/install_zeromq.sh
-
-``install_zeromq.sh`` will download specific version of Zeromq and forked version of jzmq for Storm,
-unpack, apply a patch, ``./configure``, ``make`` and ``make install`` these requirements into ``/usr/local/storm``.
 
 Install [Zookeeper](http://zookeeper.apache.org/), on which Storm also depends.
 Download the latest Zookeeper from [download page](http://www.apache.org/dyn/closer.cgi/zookeeper/).
 
     $ cd /usr/local
-    $ tar xzvf zookeeper-3.4.5.tar.gz
-    $ ln -s /usr/local/zookeeper-3.4.5 zookeeper
+    $ tar xzvf zookeeper-3.4.6.tar.gz
+    $ ln -s /usr/local/zookeeper-3.4.6 zookeeper
     $ export PATH=$PATH:/usr/local/zookeeper/bin
 
 Configure ``/usr/local/zookeeper/conf/zoo.cfg``.

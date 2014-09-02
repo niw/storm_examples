@@ -11,7 +11,7 @@
       <unpack>true</unpack>
       <!-- Exclude Storm and all dependencies -->
       <excludes>
-        <exclude>storm:storm</exclude>
+        <exclude>org.apache.storm:storm</exclude>
       </excludes>
       <useTransitiveFiltering>true</useTransitiveFiltering>
     </dependencySet>

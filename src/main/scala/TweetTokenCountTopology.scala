@@ -1,8 +1,12 @@
 import java.net.InetSocketAddress
+import java.util
+
+import backtype.storm.task.IMetricsContext
 import org.atilika.kuromoji.Tokenizer
 import storm.trident.operation.builtin.Count
 import storm.trident.TridentTopology
 import storm.trident.operation.{BaseFunction, TridentCollector}
+import storm.trident.state.{State, StateFactory}
 import storm.trident.tuple.TridentTuple
 import trident.memcached.MemcachedState
 import scala.collection.JavaConverters._
@@ -15,6 +19,7 @@ import backtype.storm.tuple.{Fields, Values}
 import java.util.concurrent.LinkedBlockingQueue
 import twitter4j.conf.ConfigurationBuilder
 import twitter4j._
+import scala.util.control.Exception._
 
 case class TwitterOAuthToken(token: String, secret: String) {
   def key = token
@@ -81,6 +86,31 @@ class TwitterSampleSpout(accessToken: TwitterOAuthToken, consumer: TwitterOAuthT
   }
 }
 
+object MemcachedSateFactory {
+  val makeStateMethod = classOf[MemcachedState[_]].getDeclaredClasses.flatMap { klass =>
+    allCatch opt klass.getMethod("makeState", classOf[util.Map[_, _]], Integer.TYPE, Integer.TYPE)
+  }.headOption getOrElse {
+    throw new RuntimeException("Couldn't find expected maksState method.")
+  }
+}
+
+class MemcachedSateFactory(host: String, port: Int) extends StateFactory {
+  import MemcachedSateFactory._
+
+  val factory = MemcachedState.nonTransactional(List(
+    new InetSocketAddress(host, port)
+  ).asJava)
+
+  // Since original MemcachedState.Factory has version incompatible makeState method,
+  // Use reflection to patch it dynamically.
+  def makeState(conf: util.Map[_, _], metrics: IMetricsContext, partitionIndex: Int, numPartitions: Int) = {
+    makeStateMethod.invoke(factory, conf, partitionIndex: java.lang.Integer, numPartitions: java.lang.Integer) match {
+      case state: State => state
+      case _ => throw new RuntimeException("Return type mismatch from makeState.")
+    }
+  }
+}
+
 object TweetTokenCountTopology {
   // Tokenizer is not serializable, then put it in object to be static.
   val tokenizer = Tokenizer.builder().build()
@@ -107,9 +137,7 @@ class TweetTokenCountTopology(args: Args) extends TopologyFactory(args) {
     val sampleSpout = new TwitterSampleSpout(accessToken, consumer)
 
     // val stateFactory = new MemoryMapState.Factory
-    val stateFactory = MemcachedState.nonTransactional(List(
-      new InetSocketAddress("localhost", 11211)
-    ).asJava)
+    val stateFactory = new MemcachedSateFactory("localhost", 11211)
 
 
     val topology = new TridentTopology()

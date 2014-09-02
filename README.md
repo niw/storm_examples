@@ -15,14 +15,6 @@ Use Java 1.7 instead of OS X default 1.6. Download it from [Oracle](http://www.o
 
     $ export JAVA_HOME=`/usr/libexec/java_home -v 1.7`
 
-Unfortunately, a dependency [``trident-memcached``](https://github.com/nathanmarz/trident-memcached) which provides an access to ``memcached`` to store results from storm is not provided yet from the repository. Following steps to install it into the local repository at ``~/.m2``.
-
-    $ brew install lein
-    $ git clone https://github.com/nathanmarz/trident-memcached.git
-    $ cd trident-memcached
-    $ lein install
-    $ ls -al ~/.m2/repository/storm/trident-memcached
-
 Now we're ready to build examples. This ``mvn`` command will download all dependencies includes Strom itself.
 
     $ mvn -Pzinc clean compile

@@ -23,6 +23,11 @@
     </repository>
 
     <repository>
+      <id>spy</id>
+      <url>http://files.couchbase.com/maven2</url>
+    </repository>
+
+    <repository>
       <id>atilika.org</id>
       <url>http://www.atilika.org/nexus/content/repositories/atilika</url>
     </repository>
@@ -41,15 +46,10 @@
       <version>0.9.2-incubating</version>
     </dependency>
 
-    <!--
-      This dependency, storm:trident-memcached:0.0.5-wip3 is not provided
-      from the repository yet, install it in local Maven repository.
-      See README.md.
-    -->
     <dependency>
       <groupId>storm</groupId>
       <artifactId>trident-memcached</artifactId>
-      <version>0.0.5-wip3</version>
+      <version>0.0.2-wip2</version>
     </dependency>
 
     <dependency>
